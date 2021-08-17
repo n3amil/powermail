@@ -14,6 +14,7 @@ use In2code\Powermail\Utility\LocalizationUtility;
 use In2code\Powermail\Utility\ObjectUtility;
 use In2code\Powermail\Utility\StringUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Extbase\Object\Exception;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException as InvalidQueryExceptionAlias;
 use TYPO3\CMS\Extbase\Persistence\Generic\Query;
@@ -112,6 +113,11 @@ class MailRepository extends AbstractRepository
         $query->getQuerySettings()->setIgnoreEnableFields(true);
         $query->getQuerySettings()->setLanguageMode(null);
 
+        $context = GeneralUtility::makeInstance(Context::class);
+        $language = $context->getPropertyFromAspect('language', 'id');
+        $query->getQuerySettings()->setLanguageUid($language);
+        $query->getQuerySettings()->setLanguageOverlayMode(false);
+        
         $and = [
             $query->equals('uid', $uid),
             $query->equals('deleted', 0)
