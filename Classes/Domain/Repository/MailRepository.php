@@ -112,6 +112,11 @@ class MailRepository extends AbstractRepository
         $query->getQuerySettings()->setIgnoreEnableFields(true);
         $query->getQuerySettings()->setLanguageMode(null);
 
+        $context = GeneralUtility::makeInstance(Context::class);
+        $language = $context->getPropertyFromAspect('language', 'id');
+        $query->getQuerySettings()->setLanguageUid($language);
+        $query->getQuerySettings()->setLanguageOverlayMode(false);
+        
         $and = [
             $query->equals('uid', $uid),
             $query->equals('deleted', 0)
