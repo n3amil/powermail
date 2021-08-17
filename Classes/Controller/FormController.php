@@ -23,6 +23,8 @@ use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotCon
 use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Annotation as ExtbaseAnnotation;
 use TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException;
 use TYPO3\CMS\Extbase\Mvc\Exception\InvalidArgumentNameException;
@@ -298,8 +300,15 @@ class FormController extends AbstractController
      */
     protected function saveMail(Mail $mail): void
     {
+        $context = GeneralUtility::makeInstance(Context::class);
+        $languageId = $context->getPropertyFromAspect('language', 'id');
+        $config = $this->configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
+        $browserLanguage = isset($config['config.']['locale_all']) ? $config['config.']['locale_all'] : 'en_US';
         $mailFactory = $this->objectManager->get(MailFactory::class);
         $mailFactory->prepareMailForPersistence($mail, $this->settings);
+        $mail->setMarketingBrowserLanguage($browserLanguage);
+        $mail->setMarketingFrontendLanguage($languageId);
+        $mail->_setProperty('_languageUid', $languageId);
         $this->mailRepository->add($mail);
         $this->persistenceManager->persistAll();
     }
